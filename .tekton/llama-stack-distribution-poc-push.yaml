@@ -101,6 +101,10 @@ spec:
         VMs
       name: privileged-nested
       type: string
+    - name: additional-build-secret
+      description: Additional secret to use while building
+      type: string
+      default: ""
     results:
     - description: ""
       name: IMAGE_URL
@@ -214,6 +218,8 @@ spec:
         value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+      - name: ADDITIONAL_SECRET
+          value: $(params.additional-build-secret)
       runAfter:
       - prefetch-dependencies
       taskRef:
