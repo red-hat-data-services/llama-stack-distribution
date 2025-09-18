@@ -33,6 +33,8 @@ spec:
     value: konflux/cpu-ubi9.conf
   - name: additional-build-secret
     value: rhel-ai-private-index-auth
+  - name: add-capabilities
+    value: ''
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
