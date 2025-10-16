@@ -45,4 +45,4 @@ COPY distribution/run.yaml ${APP_ROOT}/run.yaml
 # Download embedding model
 RUN huggingface-cli download ibm-granite/granite-embedding-125m-english
 
-ENTRYPOINT ["llama", "stack", "run", "/opt/app-root/run.yaml"]
+ENTRYPOINT ["python3", "-m", "llama_stack.core.server.server", "/opt/app-root/run.yaml"]
