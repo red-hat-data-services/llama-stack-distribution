@@ -29,7 +29,7 @@ spec:
   - name: additional-labels
     value:
     - version=v3.2.0
-    - io.openshift.tags=rhel9 llama-stack cpu
+    - io.openshift.tags=odh-llama-stack-core
     - distribution-scope=restricted
     - release=""
   - name: output-image
