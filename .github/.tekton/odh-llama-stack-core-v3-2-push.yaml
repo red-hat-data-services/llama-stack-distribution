@@ -31,7 +31,7 @@ spec:
     - version=v3.2.0
     - io.openshift.tags=rhel9 llama-stack cpu
     - distribution-scope=restricted
-    - release="
+    - release=""
   - name: output-image
     value: quay.io/rhoai/llama-stack-core-rhel9:{{target_branch}}
   - name: dockerfile
