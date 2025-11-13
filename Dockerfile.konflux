@@ -8,19 +8,17 @@ ARG WHEEL_RELEASE_X86_64
 ARG WHEEL_RELEASE_PACKAGE
 ARG WHEEL_RELEASE_PROJECT_ID
 
-LABEL com.redhat.aiplatform.image="${BASE_IMAGE}" \
-      com.redhat.aiplatform.wheel_release="${WHEEL_RELEASE_AARCH64} ${WHEEL_RELEASE_X86_64}" \
+LABEL com.redhat.component="llama-stack-cpu-rhel9-container" \
       name="llama-stack/cpu-rhel9" \
-      com.redhat.component="llama-stack-cpu-rhel9-container" \
-      com.redhat.license_terms="https://www.redhat.com/en/about/eulas#RHAIIS" \
-      distribution-scope="restricted" \
-      version="${LLAMA_STACK_VERSION}" \
-      release="" \
-      summary="Llama Stack for CPU" \
       description="Llama Stack ${LLAMA_STACK_VERSION} for CPU on RHEL 9" \
+      summary="Llama Stack for CPU" \
+      maintainer="['managed-open-data-hub@redhat.com']" \
       io.k8s.display-name="Llama Stack for CPU" \
       io.k8s.description="Llama Stack ${LLAMA_STACK_VERSION} for CPU on RHEL 9" \
-      io.openshift.tags="rhel9 llama-stack cpu"
+      io.openshift.expose-services="" \
+      com.redhat.license_terms="https://www.redhat.com/en/about/eulas#RHAIIS" \
+      com.redhat.aiplatform.image="${BASE_IMAGE}" \
+      com.redhat.aiplatform.wheel_release="${WHEEL_RELEASE_AARCH64} ${WHEEL_RELEASE_X86_64}" 
 
 RUN --mount=type=secret,id=rhel-ai-private-index-auth/BOT_PAT,target=/run/secrets/gitlab_pat,required=true,uid=${CNB_USER_ID},gid=${CNB_GROUP_ID} \
     ${APP_ROOT}/lib/tools/install-wheel-release.sh
