@@ -1,11 +1,18 @@
 FROM registry.access.redhat.com/ubi9/python-312@sha256:95ec8d3ee9f875da011639213fd254256c29bc58861ac0b11f290a291fa04435
 WORKDIR /opt/app-root
 
+RUN pip install uv
 RUN pip install sqlalchemy # somehow sqlalchemy[asyncio] is not sufficient
 {dependencies}
-RUN pip install --no-cache llama-stack==0.2.18
-RUN mkdir -p ${{HOME}}/.llama/providers.d ${{HOME}}/.cache
-COPY distribution/run.yaml ${{APP_ROOT}}/run.yaml
-COPY distribution/providers.d/ ${{HOME}}/.llama/providers.d/
+{llama_stack_install_source}
 
-ENTRYPOINT ["python", "-m", "llama_stack.core.server.server", "/opt/app-root/run.yaml"]
+RUN mkdir -p ${{HOME}}/.llama ${{HOME}}/.cache
+COPY distribution/run.yaml ${{APP_ROOT}}/run.yaml
+COPY --chmod=755 distribution/entrypoint.sh ${{APP_ROOT}}/entrypoint.sh
+
+#TODO: remove this once we have a stable version of llama-stack
+# LLS server version is not aligned with the client version, so we disable the version check
+# Currently, LLS client version is 0.3.0, while the server version is 0.3.0rc3+rhai0
+ENV LLAMA_STACK_DISABLE_VERSION_CHECK=true
+
+ENTRYPOINT [ "/opt/app-root/entrypoint.sh" ]
