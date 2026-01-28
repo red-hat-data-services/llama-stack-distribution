@@ -5,7 +5,7 @@
   ],
   "enabledManagers": ["dockerfile", "tekton", "custom.regex"],
   "baseBranches": [
-    "/^main$|^rhoai-.*$/"
+    "/^test-poc$|^rhoai-.*$/"
   ],
   "packageRules": [
     {
@@ -21,7 +21,7 @@
       "enabled": true,
       "groupName": "base-image",
       "matchBaseBranches": [
-        "main"
+        "test-poc"
       ]
     },
     {
@@ -42,7 +42,7 @@
       "enabled": true,
       "groupName": "llama-stack-version",
       "matchBaseBranches": [
-        "main"
+        "test-poc"
       ]
     },
     {
@@ -62,7 +62,7 @@
       "enabled": true,
       "groupName": "wheel-releases",
       "matchBaseBranches": [
-        "main"
+        "test-poc"
       ]
     },
     {
