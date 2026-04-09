@@ -5,6 +5,7 @@ WORKDIR /opt/app-root
 RUN pip install uv
 RUN pip install sqlalchemy # somehow sqlalchemy[asyncio] is not sufficient
 RUN uv pip install opentelemetry-distro
+RUN uv pip install structlog # core llama-stack dep not covered by provider deps
 RUN uv pip install --upgrade \
     'kfp-kubernetes==2.14.6' \
     'pyarrow>=21.0.0' \
@@ -18,7 +19,7 @@ RUN uv pip install \
     'datasets>=4.0.0' \
     'fonttools>=4.60.2' \
     'mcp>=1.23.0' \
-    'nltk>=3.9.3' \
+    'nltk>=3.9.4' \
     'pymilvus==2.6.9' \
     'pymilvus[milvus-lite]==2.6.9' \
     'pypdf>=6.7.2' \
@@ -33,7 +34,6 @@ RUN uv pip install \
     fire \
     google-genai \
     httpx \
-    litellm \
     matplotlib \
     numpy \
     opentelemetry-exporter-otlp-proto-http \
@@ -57,19 +57,23 @@ RUN uv pip install \
 RUN uv pip install \
     llama_stack_provider_lmeval==0.5.0
 RUN uv pip install \
-    llama_stack_provider_ragas[inline]==0.6.0
+    llama_stack_provider_ragas[inline]==0.6.1
 RUN uv pip install \
-    llama_stack_provider_ragas[remote]==0.6.0
+    llama_stack_provider_ragas[remote]==0.6.1
 RUN uv pip install \
     llama_stack_provider_trustyai_fms==0.4.0
 RUN uv pip install \
     llama_stack_provider_trustyai_garak==0.3.1
 RUN uv pip install --extra-index-url https://download.pytorch.org/whl/cpu 'torchao>=0.12.0' torch torchvision
 RUN uv pip install --no-deps sentence-transformers
-RUN uv pip install --no-cache --no-deps git+https://github.com/opendatahub-io/llama-stack.git@v0.6.0.1+rhai0
-RUN uv pip install --no-cache --no-deps llama-stack-client==v0.6.0
+RUN uv pip install --no-cache --no-deps git+https://github.com/opendatahub-io/llama-stack.git@main
+RUN uv pip install --no-cache --no-deps 'llama-stack-api@git+https://github.com/opendatahub-io/llama-stack.git@main#subdirectory=src/llama_stack_api'
 RUN set -o pipefail && opentelemetry-bootstrap -a requirements | uv pip install --requirement -
 RUN mkdir -p ${HOME}/.llama ${HOME}/.cache
+# Pre-cache tiktoken cl100k_base encoding to avoid runtime download
+# from openaipublic.blob.core.windows.net (used by vector_store chunking)
+ENV TIKTOKEN_CACHE_DIR="${HOME}/.cache/tiktoken"
+RUN python3 -c "import tiktoken; tiktoken.get_encoding('cl100k_base')"
 COPY distribution/config.yaml ${APP_ROOT}/config.yaml
 COPY --chmod=755 distribution/entrypoint.sh ${APP_ROOT}/entrypoint.sh
 #TODO: remove this once we have a stable version of llama-stack

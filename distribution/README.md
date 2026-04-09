@@ -4,20 +4,19 @@
 
 This image contains the official Open Data Hub Llama Stack distribution, with all the packages and configuration needed to run a Llama Stack server in a containerized environment.
 
-The image is currently shipping with the Open Data Hub version of Llama Stack version [0.6.0.1+rhai0](https://github.com/opendatahub-io/llama-stack/releases/tag/v0.6.0.1+rhai0)
+The image is currently shipping with the Open Data Hub version of Llama Stack version [main](https://github.com/opendatahub-io/llama-stack/tree/main)
 
 You can see an overview of the APIs and Providers the image ships with in the table below.
 
 | API | Provider | External? | Enabled by default? | How to enable |
 |-----|----------|-----------|---------------------|---------------|
-| agents | inline::meta-reference | No | ✅ | N/A |
 | batches | inline::reference | No | ✅ | N/A |
 | datasetio | inline::localfs | No | ✅ | N/A |
 | datasetio | remote::huggingface | No | ✅ | N/A |
-| eval | inline::trustyai_ragas | Yes (version 0.6.0) | ❌ | Set the `TRUSTYAI_EMBEDDING_MODEL` environment variable |
+| eval | inline::trustyai_ragas | Yes (version 0.6.1) | ❌ | Set the `TRUSTYAI_EMBEDDING_MODEL` environment variable |
 | eval | remote::trustyai_garak | Yes (version 0.3.1) | ❌ | Set the `ENABLE_KUBEFLOW_GARAK` environment variable |
 | eval | remote::trustyai_lmeval | Yes (version 0.5.0) | ✅ | N/A |
-| eval | remote::trustyai_ragas | Yes (version 0.6.0) | ❌ | Set the `ENABLE_KUBEFLOW_RAGAS` environment variable |
+| eval | remote::trustyai_ragas | Yes (version 0.6.1) | ❌ | Set the `ENABLE_KUBEFLOW_RAGAS` environment variable |
 | files | inline::localfs | No | ✅ | N/A |
 | files | remote::s3 | No | ❌ | Set the `ENABLE_S3` environment variable |
 | inference | inline::sentence-transformers | No | ❌ | Set the `ENABLE_SENTENCE_TRANSFORMERS` environment variable |
@@ -28,17 +27,18 @@ You can see an overview of the APIs and Providers the image ships with in the ta
 | inference | remote::vllm | No | ❌ | Set the `VLLM_URL` environment variable |
 | inference | remote::vllm | No | ❌ | Set the `VLLM_EMBEDDING_URL` environment variable |
 | inference | remote::watsonx | No | ❌ | Set the `WATSONX_API_KEY` environment variable |
+| responses | inline::builtin | No | ✅ | N/A |
 | safety | remote::passthrough | No | ❌ | Set the `PASSTHROUGH_SAFETY_URL` environment variable |
 | safety | remote::trustyai_fms | Yes (version 0.4.0) | ✅ | N/A |
 | scoring | inline::basic | No | ✅ | N/A |
 | scoring | inline::braintrust | No | ✅ | N/A |
 | scoring | inline::llm-as-judge | No | ✅ | N/A |
-| tool_runtime | inline::rag-runtime | No | ✅ | N/A |
+| tool_runtime | inline::file-search | No | ✅ | N/A |
 | tool_runtime | remote::brave-search | No | ✅ | N/A |
 | tool_runtime | remote::model-context-protocol | No | ✅ | N/A |
 | tool_runtime | remote::tavily-search | No | ✅ | N/A |
 | vector_io | inline::faiss | No | ❌ | Set the `ENABLE_FAISS` environment variable |
-| vector_io | inline::milvus | No | ✅ | N/A |
+| vector_io | inline::milvus | No | ❌ | Set the `ENABLE_INLINE_MILVUS` environment variable. Incompatible with multi-worker deployments |
 | vector_io | remote::milvus | No | ❌ | Set the `MILVUS_ENDPOINT` environment variable |
 | vector_io | remote::pgvector | No | ❌ | Set the `ENABLE_PGVECTOR` environment variable |
 | vector_io | remote::qdrant | No | ❌ | Set the `ENABLE_QDRANT` environment variable |

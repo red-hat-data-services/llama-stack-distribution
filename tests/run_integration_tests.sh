@@ -63,7 +63,13 @@ function run_integration_tests() {
     # Test to skip
     # TODO: re-enable the 2 chat_completion_non_streaming tests once they contain include max tokens (to prevent them from rambling)
     # test_openai_completion_guided_choice needs vllm  >= v0.12.0 https://github.com/llamastack/llama-stack/issues/4984
-    SKIP_TESTS="test_text_chat_completion_tool_calling_tools_not_in_request or test_text_chat_completion_structured_output or test_text_chat_completion_non_streaming or test_openai_chat_completion_non_streaming or test_openai_chat_completion_with_tool_choice_none or test_openai_chat_completion_with_tools or test_openai_format_preserves_complex_schemas or test_multiple_tools_with_different_schemas or test_tool_with_complex_schema or test_tool_without_schema or test_openai_completion_guided_choice"
+    # test_openai_embeddings_with_dimensions and test_openai_embeddings_with_encoding_format_base64
+    # pass a `dimensions` parameter which requires matryoshka representation support.
+    # granite-embedding-125m-english was not trained with Matryoshka Representation Learning,
+    # so vLLM correctly rejects these requests with a 400 error. sentence-transformers silently
+    # truncated without validation, masking the issue.
+    # test_openai_completion_logprobs{,_streaming}: upstream schema defines logprobs as bool, should be int https://github.com/llamastack/llama-stack/issues/5253
+    SKIP_TESTS="test_text_chat_completion_tool_calling_tools_not_in_request or test_text_chat_completion_structured_output or test_text_chat_completion_non_streaming or test_openai_chat_completion_non_streaming or test_openai_chat_completion_with_tool_choice_none or test_openai_chat_completion_with_tools or test_openai_format_preserves_complex_schemas or test_multiple_tools_with_different_schemas or test_tool_with_complex_schema or test_tool_without_schema or test_openai_completion_guided_choice or test_openai_embeddings_with_dimensions or test_openai_embeddings_with_encoding_format_base64 or test_openai_completion_logprobs or test_openai_completion_logprobs_streaming"
 
     # Dynamically determine the path to config.yaml from the original script directory
     STACK_CONFIG_PATH="$SCRIPT_DIR/../distribution/config.yaml"
@@ -72,7 +78,7 @@ function run_integration_tests() {
         exit 1
     fi
 
-    uv venv
+    uv venv --clear
     # shellcheck source=/dev/null
     source .venv/bin/activate
     uv pip install llama-stack-client ollama
@@ -101,12 +107,13 @@ function main() {
     # Build list of models to test based on available configuration
     models_to_test=("$VLLM_INFERENCE_MODEL")
 
-    # Only include Vertex AI models if VERTEX_AI_PROJECT is set
-    if [ -n "${VERTEX_AI_PROJECT:-}" ]; then
-        echo "VERTEX_AI_PROJECT is set, including Vertex AI models in tests"
+    # Only include Vertex AI models if credentials are available
+    # (GCP auth step only runs on amd64, so credentials won't exist on arm64)
+    if [ -n "${VERTEX_AI_PROJECT:-}" ] && [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] && [ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+        echo "Vertex AI credentials available, including Vertex AI models in tests"
         models_to_test+=("$VERTEX_AI_INFERENCE_MODEL")
     else
-        echo "VERTEX_AI_PROJECT is not set, skipping Vertex AI models"
+        echo "Vertex AI credentials not available, skipping Vertex AI models"
     fi
 
     # Only include OpenAI models if OPENAI_API_KEY is set
