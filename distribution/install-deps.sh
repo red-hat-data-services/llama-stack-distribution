@@ -9,10 +9,7 @@ uv pip install --upgrade \
 'pyarrow>=21.0.0' \
 'botocore==1.35.88' \
 'boto3==1.35.88' \
-'aiobotocore==2.16.1' \
-'ibm-cos-sdk-core==2.14.2' \
-'ibm-cos-sdk==2.14.2' \
-'setuptools==81.0.0'
+'aiobotocore==2.16.1'
 uv pip install \
 'datasets>=4.0.0' \
 'fonttools>=4.60.2' \
