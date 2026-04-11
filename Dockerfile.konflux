@@ -15,40 +15,24 @@ LABEL com.redhat.component="llama-stack-cpu-rhel9-container" \
       com.redhat.license_terms="https://www.redhat.com/en/about/eulas#RHAIIS" \
       com.redhat.aiplatform.image="${BASE_IMAGE}"
 
-RUN pip install uv
-RUN pip install sqlalchemy # somehow sqlalchemy[asyncio] is not sufficient
-RUN uv pip install opentelemetry-distro
-RUN uv pip install structlog # core llama-stack dep not covered by provider deps
-
-COPY distribution/install-deps.sh /tmp/install-deps.sh
-RUN /tmp/install-deps.sh && rm /tmp/install-deps.sh
-
-RUN set -o pipefail && opentelemetry-bootstrap -a requirements | uv pip install --requirement -
+COPY --chmod=755 distribution/install-deps.sh distribution/install-common.sh /tmp/
+RUN /tmp/install-common.sh
 
 USER 0
-# install missing RPMs (online, requires subscription)
-# RUN ${APP_ROOT}/lib/tools/fromager-rpm-check.py --check-dnf -y --dnf-clean
 # switch from internal mirrors to public vendor repos
 RUN ${APP_ROOT}/lib/tools/public-repos.sh
 USER ${CNB_USER_ID}:${CNB_GROUP_ID}
 
-# scan for missing RPMs (offline), missing libraries / symbols, and selftest
-# AIPCC-3688: do not scan the container for missing libraries and symbols
-# re-add ${APP_ROOT}/lib/tools/scanlibs.py below once milvus-lite build is fixed
+# scan for missing RPMs (offline) and selftest
 RUN ${APP_ROOT}/lib/tools/fromager-rpm-check.py --check-rpmdb \
     && ${APP_ROOT}/lib/tools/selftest.py
 
-# LLama Stack configuration
-RUN mkdir -p ${HOME}/.llama ${HOME}/.cache
 COPY distribution/config.yaml ${APP_ROOT}/config.yaml
 COPY --chmod=755 distribution/entrypoint.sh ${APP_ROOT}/entrypoint.sh
 
 # Download embedding model
 RUN hf download ibm-granite/granite-embedding-125m-english
 
-# Pre-cache tiktoken cl100k_base encoding to avoid runtime download
-# from openaipublic.blob.core.windows.net (used by vector_store chunking)
 ENV TIKTOKEN_CACHE_DIR="${HOME}/.cache/tiktoken"
-RUN python3 -c "import tiktoken; tiktoken.get_encoding('cl100k_base')"
 
 ENTRYPOINT [ "/opt/app-root/entrypoint.sh" ]
