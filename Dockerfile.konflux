@@ -3,11 +3,6 @@ FROM ${BASE_IMAGE}
 
 ARG BASE_IMAGE
 ARG LLAMA_STACK_VERSION
-ARG WHEEL_RELEASE_AARCH64
-ARG WHEEL_RELEASE_X86_64
-ARG WHEEL_RELEASE_PPC64LE
-ARG WHEEL_RELEASE_PACKAGE
-ARG WHEEL_RELEASE_PROJECT_ID
 
 LABEL com.redhat.component="llama-stack-cpu-rhel9-container" \
       name="llama-stack/cpu-rhel9" \
@@ -18,11 +13,17 @@ LABEL com.redhat.component="llama-stack-cpu-rhel9-container" \
       io.k8s.description="Llama Stack ${LLAMA_STACK_VERSION} for CPU on RHEL 9" \
       io.openshift.expose-services="" \
       com.redhat.license_terms="https://www.redhat.com/en/about/eulas#RHAIIS" \
-      com.redhat.aiplatform.image="${BASE_IMAGE}" \
-      com.redhat.aiplatform.wheel_release="${WHEEL_RELEASE_AARCH64} ${WHEEL_RELEASE_X86_64} ${WHEEL_RELEASE_PPC64LE}"
+      com.redhat.aiplatform.image="${BASE_IMAGE}"
 
-RUN --mount=type=secret,id=rhel-ai-private-index-auth/BOT_PAT,target=/run/secrets/gitlab_pat,required=true,uid=${CNB_USER_ID},gid=${CNB_GROUP_ID} \
-    ${APP_ROOT}/lib/tools/install-wheel-release.sh
+RUN pip install uv
+RUN pip install sqlalchemy # somehow sqlalchemy[asyncio] is not sufficient
+RUN uv pip install opentelemetry-distro
+RUN uv pip install structlog # core llama-stack dep not covered by provider deps
+
+COPY distribution/install-deps.sh /tmp/install-deps.sh
+RUN /tmp/install-deps.sh && rm /tmp/install-deps.sh
+
+RUN set -o pipefail && opentelemetry-bootstrap -a requirements | uv pip install --requirement -
 
 USER 0
 # install missing RPMs (online, requires subscription)
