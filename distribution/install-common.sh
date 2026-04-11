@@ -13,7 +13,8 @@ uv pip install structlog # core llama-stack dep not covered by provider deps
 /tmp/install-deps.sh
 
 # Install opentelemetry instrumentation packages
-opentelemetry-bootstrap -a requirements | uv pip install --requirement -
+opentelemetry-bootstrap -a requirements | grep -v -e botocore -e system-metrics | uv pip install --requirement -
+
 
 # Create cache directories
 mkdir -p ${HOME}/.llama ${HOME}/.cache
